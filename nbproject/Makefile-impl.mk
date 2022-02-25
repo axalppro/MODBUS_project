@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=solar_soluce.X
+PROJECTNAME=MODBUS_project
 
 # Active Configuration
 DEFAULTCONF=default
