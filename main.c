@@ -48,6 +48,8 @@ void main(void)
 	LCD_2x16_WriteMsg((unsigned char *)"*-*-*-*-*-*-*-*-", 1); // display on line 1
 			
 	// TODO -> complete measure of current offset
+    
+    //MDRRRRR TOTLTOTLTOLTOT
 
 	while (true) {
 	// TODO -> complete the main loop
