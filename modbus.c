@@ -34,6 +34,7 @@ uint8_t recPtr = 0;
 void modbus_timer(void)
 {
 	// TODO -> complete what to do on modbus timer event
+    TMR1IF = 0;
    
 }
 
@@ -46,6 +47,8 @@ uint8_t modbus_analyse_and_answer(void)
 void modbus_char_recvd(uint8_t c)
 {
 	// TODO -> complete modbus char receive 
+    RC1IF = 0;
+    uart_send(&c, 1);
 }
 
 void modbus_send(uint8_t length)

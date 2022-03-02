@@ -26,7 +26,7 @@ void init_hw()
 	adc_init();
 	modbus_init(0x80);
 	pwm_init();
-  uart_init();
+    uart_init();
 	// Interrupts configuration
 	PEIE = 1;
 	GIE = 1;
@@ -48,12 +48,19 @@ void main(void)
 	LCD_2x16_WriteMsg((unsigned char *)"*-*-*-*-*-*-*-*-", 1); // display on line 1
 			
 	// TODO -> complete measure of current offset
+    pwm_set(500);
     
-    //MDRRRRR TOTLTOTLTOLTOT
-    //test2
-    //test token
+    uint8_t msg[5] = {'A', 'B', 'C', 'D', 'E'};
+    
+    char msg_char[11] = "Hello World";
+        
+    uart_send(msg_char, 11);
 
 	while (true) {
 	// TODO -> complete the main loop
+        
+        
+        
+        __delay_ms(30);
 	}
 }

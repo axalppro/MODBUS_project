@@ -16,6 +16,21 @@
 void adc_init(void)
 {
 	// TODO -> complete adc initialisation
+    
+    
+    ANSEL0 = 1; //Set RA0 as analog input
+    ANSEL1 = 1; //Set RA1 as analog input
+    ADCON1Lbits.SSRC = 0b0111;
+    
+    
+    ADCHS0Lbits.CH0SA = 0; // Use AN0 
+    ADCON3H = 0x1F;
+    ADCON3L = 0x02;
+    ADCON2L = 0x0;
+    
+    MODE12 = 1;
+    ADON = 1;   //Turn ON the AD converter
+    
 
 }
 
