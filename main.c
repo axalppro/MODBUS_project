@@ -51,25 +51,33 @@ void delay_ms(int t)
 
 void main(void)
 {
-	init_hw();
+    init_hw();
 	
-	LCD_2x16_WriteMsg((unsigned char *)"Welcome !       ", 0); // display on line 0
+	LCD_2x16_WriteMsg((unsigned char *)"Modbus !        ", 0); // display on line 0
 	LCD_2x16_WriteMsg((unsigned char *)"*-*-*-*-*-*-*-*-", 1); // display on line 1
 	    
     pwm_set(0);    
-    delay_ms(1);    
+    delay_ms(100);    
     offset = measure_current(0);
+    delay_ms(500);
+    
+    holding_registers[0] = 500;
+    
     delay_ms(1);
-    pwm_set(0);
     
 
 	while (true) {
-	// TODO -> complete the main loop
+	      
+        //Updating the PWM value
+        pwm_set(holding_registers[0]);
         
+        //Write the current voltage
         input_registers[0] = measure_voltage();
-        delay_ms(50);
-        input_registers[1] = measure_current(offset)>>8;
-        delay_ms(50);
+        __delay_us(100);
+        
+        //Write the current current
+        input_registers[1] = measure_current(offset);
+        __delay_us(100);
      
         
 	}

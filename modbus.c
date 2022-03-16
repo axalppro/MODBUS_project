@@ -15,11 +15,7 @@ uint8_t modbusAddress;
 uint16_t input_registers[2];
 uint16_t holding_registers[2];
 
-// Modbus error codes
-#define ILLEGAL_FUNCTION		1
-#define ILLEGAL_DATA_ADDRESS	2
-#define ILLEGAL_DATA_VALUE		3
-#define SLAVE_DEVICE_FAILURE	4
+
 
 /**
  * Buffers for serial receive and send operations 
@@ -64,6 +60,7 @@ uint8_t modbus_analyse_and_answer(void)
     tx_buf[1] = rx_buf[1];
     uint16_t start_adr;
     uint16_t n_register;
+    uint16_t value;
  
     switch(rx_buf[1])
     {
@@ -76,9 +73,42 @@ uint8_t modbus_analyse_and_answer(void)
             
             for(int i = 0; i < n_register; i++)
             {
-                tx_buf[3+i] = input_registers[start_adr+i];
+                tx_buf[3+(i*2)] = input_registers[start_adr+i]>>8;
+                tx_buf[4+(2*i)] = input_registers[start_adr+i];
             }  
-            modbus_send(3+n_register);
+            modbus_send(3+2*n_register);
+        
+            break;
+            
+        case READ_HOLDING_REGISTERS:   
+            
+            start_adr = ((uint16_t)(rx_buf[2])<<8) + rx_buf[2];            
+            n_register  = ((uint16_t)(rx_buf[4])<<8) + rx_buf[5];
+            
+            tx_buf[2] = 2* n_register;
+            
+            for(int i = 0; i < n_register; i++)
+            {
+                tx_buf[3+(i*2)] = holding_registers[start_adr+i]>>8;
+                tx_buf[4+(2*i)] = holding_registers[start_adr+i];
+            }  
+            modbus_send(3+2*n_register);
+        
+            break;
+            
+        case WRITE_SINGLE_REGISTER:   
+            
+            start_adr = ((uint16_t)(rx_buf[2])<<8) + rx_buf[2];            
+            value  = ((uint16_t)(rx_buf[4])<<8) + rx_buf[5];
+            
+            holding_registers[start_adr] = value;
+            
+            tx_buf[2] = start_adr>>8;
+            tx_buf[3] = start_adr;
+            tx_buf[4] = value>>8;
+            tx_buf[5] = value;
+                    
+            modbus_send(6);
         
             break;
             
@@ -86,12 +116,6 @@ uint8_t modbus_analyse_and_answer(void)
             break;
     }
     
-    
-        
-         
-    
-    
-  
 }
 
 void modbus_char_recvd(uint8_t c)
@@ -125,7 +149,9 @@ void modbus_send(uint8_t length)
 void modbus_init(uint8_t address)
 {
 	modbusAddress = address;
-    // TODO -> configure timer for modbus usage
+    
+    
+    //Configuring timer for modbus usage  
     
     TMR1H = 0xDC;
     TMR1L = 0xD7;
@@ -133,7 +159,7 @@ void modbus_init(uint8_t address)
     T1CKPS0 = 1;  //PS = 8
     T1CKPS1 = 1;  //PS = 8
     
-    T1CONbits.RD16 = 1;
+    T1CONbits.RD16 = 1; //Timer working with 16bit
     
     TMR1ON = 0; //TMR off at start
     TMR1IE = 1; //Interrupt enabled
