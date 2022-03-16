@@ -32,14 +32,11 @@ void init_hw()
 	GIE = 1;
 }
 
-uint8_t tmpStr[30];
+//Global variables
 uint16_t u; ///< Voltage in milliovolts
 uint16_t i; ///< Current in microamperes
 uint16_t p; ///< Power in microwatts
-
-uint16_t offset;
-uint16_t pwm = 512;
-uint8_t msg_val[7] = {0,0,0,0,0,0,0};
+uint16_t offset; ///< Current offset in microamperes
 
 void delay_ms(int t)
 {
@@ -51,19 +48,21 @@ void delay_ms(int t)
 
 void main(void)
 {
+    //First initialize everything
     init_hw();
 	
+    //Write a message on the LCD
 	LCD_2x16_WriteMsg((unsigned char *)"Modbus !        ", 0); // display on line 0
 	LCD_2x16_WriteMsg((unsigned char *)"*-*-*-*-*-*-*-*-", 1); // display on line 1
 	    
+    /*We need to measure the offset of the current*/
+
+    //PWM to 0 -> 0V on the resitor mesured 
     pwm_set(0);    
-    delay_ms(100);    
-    offset = measure_current(0);
+    delay_ms(100);    //Need to wait a bit before starting the conversion
+    offset = measure_current(0); //Measure the offset
     delay_ms(500);
-    
-    holding_registers[0] = 500;
-    
-    delay_ms(1);
+    /*--------------------------------------------*/
     
 
 	while (true) {

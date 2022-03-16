@@ -16,7 +16,6 @@ uint16_t input_registers[2];
 uint16_t holding_registers[2];
 
 
-
 /**
  * Buffers for serial receive and send operations 
  * which are more than one byte long
@@ -29,86 +28,101 @@ uint8_t recPtr = 0;
 
 void modbus_timer(void)
 {
-	// TODO -> complete what to do on modbus timer event
-    
+    //Turn the timer off until the next char is received
     TMR1ON = 0;
     
     modbus_analyse_and_answer();
-    recPtr = 0;
+
+    recPtr = 0; //Reset the index
     
-    TMR1IF = 0;
+    TMR1IF = 0; //Reset the flag
    
 }
 
+
+/* This function analyze the recevied bytes
+    it determines if the frame is valid and then 
+    execute the function */
 uint8_t modbus_analyse_and_answer(void)
 {
-	// TODO -> complete the modbus analyse and answer
-    
+    //Ignore the frame if the adress is incorrect
     if(rx_buf[0] != modbusAddress)
     {
         return;
     }
-        
+    
+    //Get the transmitted and calculated CRC to compare
     uint16_t crc_received = ((uint16_t)(rx_buf[recPtr-1])<<8) + rx_buf[recPtr-2];  
     uint16_t crc_calc = CRC16(rx_buf, recPtr-2);  
 
+    //Ignore the frame if the CRC are different
     if(crc_received != crc_calc)
     {
         return;                        
     }
-    tx_buf[0] = rx_buf[0];
-    tx_buf[1] = rx_buf[1];
+
+    /*Formating the response frame*/
+
+    tx_buf[0] = rx_buf[0];  //Adress
+    tx_buf[1] = rx_buf[1];  //Modbus function code
+
+    //Temp. variables used in the switch case
     uint16_t start_adr;
     uint16_t n_register;
     uint16_t value;
- 
+    
+    //Depending on the function code
     switch(rx_buf[1])
     {
         case READ_INPUT_REGISTERS:   
             
+            //Extract start adress and number of registers to read from the frame
             start_adr = ((uint16_t)(rx_buf[2])<<8) + rx_buf[2];            
             n_register  = ((uint16_t)(rx_buf[4])<<8) + rx_buf[5];
             
-            tx_buf[2] = 2* n_register;
+            tx_buf[2] = 2* n_register; //Number of registers that will be sent back
             
             for(int i = 0; i < n_register; i++)
             {
                 tx_buf[3+(i*2)] = input_registers[start_adr+i]>>8;
                 tx_buf[4+(2*i)] = input_registers[start_adr+i];
             }  
-            modbus_send(3+2*n_register);
+
+            modbus_send(3+2*n_register); //Call modbus_send() with the response frame's size (w/o CRC)
         
             break;
             
         case READ_HOLDING_REGISTERS:   
-            
+
+            //Extract start adress and number of registers to read from the frame
             start_adr = ((uint16_t)(rx_buf[2])<<8) + rx_buf[2];            
             n_register  = ((uint16_t)(rx_buf[4])<<8) + rx_buf[5];
             
-            tx_buf[2] = 2* n_register;
+            tx_buf[2] = 2* n_register;  //Number of registers that will be sent back
             
             for(int i = 0; i < n_register; i++)
             {
                 tx_buf[3+(i*2)] = holding_registers[start_adr+i]>>8;
                 tx_buf[4+(2*i)] = holding_registers[start_adr+i];
             }  
-            modbus_send(3+2*n_register);
+            modbus_send(3+2*n_register);    //Call modbus_send() with the response frame's size (w/o CRC)
         
             break;
             
         case WRITE_SINGLE_REGISTER:   
-            
+            //Extract adress and value to write in the register
             start_adr = ((uint16_t)(rx_buf[2])<<8) + rx_buf[2];            
             value  = ((uint16_t)(rx_buf[4])<<8) + rx_buf[5];
             
             holding_registers[start_adr] = value;
             
+            //Returning the adress and value that has been changed
             tx_buf[2] = start_adr>>8;
             tx_buf[3] = start_adr;
             tx_buf[4] = value>>8;
             tx_buf[5] = value;
                     
-            modbus_send(6);
+            modbus_send(6); //Call modbus_send() with the response frame's size (w/o CRC)
         
             break;
             
