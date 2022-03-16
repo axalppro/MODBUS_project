@@ -56,63 +56,21 @@ void main(void)
 	LCD_2x16_WriteMsg((unsigned char *)"Welcome !       ", 0); // display on line 0
 	LCD_2x16_WriteMsg((unsigned char *)"*-*-*-*-*-*-*-*-", 1); // display on line 1
 	    
+    pwm_set(0);    
+    delay_ms(1);    
+    offset = measure_current(0);
+    delay_ms(1);
     pwm_set(0);
     
-    delay_ms(1);
-    
-    offset = measure_current(0);
-    
-    
-    char msg_char[8] = ": tesffO";
-        
-    uart_send(msg_char, 8);
-    
-    uint16_t c_temp = offset;
-    msg_val[2] = (uint8_t)(0x30 + c_temp%10);
-    c_temp = c_temp/10;
-    msg_val[3] = (uint8_t)(0x30 + c_temp%10);
-    c_temp = c_temp/10;
-    msg_val[4] = (uint8_t)(0x30 + c_temp%10);
-    c_temp = c_temp/10;
-    msg_val[5] = (uint8_t)(0x30 + c_temp%10);
-    c_temp = c_temp/10;
-    msg_val[6] = (uint8_t)(0x30 + c_temp%10);
-    msg_val[1] = '\n';
-    msg_val[0] = '\r';   
-    
-    uart_send(msg_val, 7);
-    
-    pwm_set(500);
-   
 
 	while (true) {
 	// TODO -> complete the main loop
         
-        u = measure_current(offset);
-              
-        
-                
-        uint16_t u_temp = u;
-        msg_val[2] = (uint8_t)(0x30 + u_temp%10);
-        u_temp = u_temp/10;
-        msg_val[3] = (uint8_t)(0x30 + u_temp%10);
-        u_temp = u_temp/10;
-        msg_val[4] = (uint8_t)(0x30 + u_temp%10);
-        u_temp = u_temp/10;
-        msg_val[5] = (uint8_t)(0x30 + u_temp%10);
-        u_temp = u_temp/10;
-        msg_val[6] = (uint8_t)(0x30 + u_temp%10);
-        msg_val[1] = '\n';
-        msg_val[0] = '\r';        
-        
-        
-        
-        
-        uart_send(msg_val, 7);
-        
-        delay_ms(500);
-        
-        
+        input_registers[0] = measure_voltage();
+        delay_ms(50);
+        input_registers[1] = measure_current(offset)>>8;
+        delay_ms(50);
+     
         
 	}
 }

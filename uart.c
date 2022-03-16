@@ -17,6 +17,8 @@ void uart_init(void)
     RCSTA1bits.SPEN = 1;  //Enable serial port
     RCSTA1bits.CREN = 1;  //Enable receiving
     
+    
+    
     BAUDCON1bits.BRG16 = 1;   //16bit baudrate
     TXSTA1bits.BRGH = 0;      //Low speed
     
@@ -28,10 +30,10 @@ void uart_init(void)
 }
 void uart_send(uint8_t * dataPtr, uint8_t length)
 {
-    for(int i = 1; i <= length; i++)
+    for(int i = 0; i < length; i++)
     {
         while(TX1IF != 1)
         {}
-        TXREG1 = dataPtr[length-i];
+        TXREG1 = dataPtr[i];
     }
 }
