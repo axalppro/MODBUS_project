@@ -15,6 +15,7 @@
 #include "modbus.h"
 #include "uart.h"
 
+
 #define _XTAL_FREQ  64000000L
 /**
  * Initialize clock, buttons, leds and interrupts
